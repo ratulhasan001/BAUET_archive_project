@@ -1,0 +1,182 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<div class="grid grid-cols-3 gap-4">
+  <div></div>
+  <div class="py-2 px-3 rounded-xl bg-white mt-12">
+    <div class="w-full mt-10">
+      <h1 class="font-bold text-3xl text-center pb-5 shadow-md">
+        Update Your Profile
+      </h1>
+      <form
+        method="post"
+        class="shadow-md border border-gray-200 rounded px-8 pt-6 pb-8 mb-4"
+      >
+        {% csrf_token %} {% for hidden_field in form.hidden_fields %} {{hidden_field.errors }} {{ hidden_field }} {% endfor %}
+
+        <div class="mb-3">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.username.id_for_label }}"
+          >
+            {{ form.username.label }}
+          </label>
+          {{ form.username }} {% if form.username.errors %} {% for error in form.username.errors %}
+          <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+          {% endfor %} 
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.first_name.id_for_label }}"
+          >
+            {{ form.first_name.label }}
+          </label>
+          {{ form.first_name }} {% if form.first_name.errors %} {% for error in form.first_name.errors %}
+          <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+          {% endfor %} {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.last_name.id_for_label }}"
+          >
+            {{ form.last_name.label }}
+          </label>
+          {{ form.last_name }} {% if form.last_name.errors %} {% for error in form.last_name.errors %}
+          <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+          {% endfor %} {% endif %}
+        </div>
+        <div class="mb-3">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.email.id_for_label }}"
+          >
+            {{ form.email.label }}
+          </label>
+          {{ form.email }} {% if form.email.errors %} {% for error in form.email.errors %}
+          <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+          {% endfor %} {% endif %}
+        </div>
+        <div class="mb-3">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.contact_number.id_for_label }}"
+          >
+            {{ form.contact_number.label }}
+          </label>
+          {{ form.contact_number }} {% if form.contact_number.errors %} {% for error in form.contact_number.errors %}
+          <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+          {% endfor %} {% endif %}
+        </div>
+        <div class="mb-3">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.address.id_for_label }}"
+          >
+            {{ form.address.label }}
+          </label>
+          {{ form.address }} {% if form.address.errors %} {% for error in form.address.errors %}
+          <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+          {% endfor %} {% endif %}
+        </div>
+
+
+        <div class="mb-3">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.designation.id_for_label }}"
+          >
+            {{ form.designation.label }}
+          </label>
+          {{ form.designation }} {% if form.designation.errors %} {% for error in form.designation.errors %}
+          <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+          {% endfor %} {% endif %}
+        </div>
+
+
+          
+        <div class="mb-3">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.dept.id_for_label }}"
+          >
+            {{ form.dept.label }}
+          </label>
+          {{ form.dept }} {% if form.dept.errors %} {% for error in form.dept.errors %}
+          <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+          {% endfor %} {% endif %}
+        </div>
+        <div class="mb-3" id="div_id_student_id">
+          <label
+            class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            for="{{ form.student_id.id_for_label }}"
+          >
+            {{ form.student_id.label }}
+          </label>
+          {{ form.student_id }}
+          {% if form.student_id.errors %}
+            {% for error in form.student_id.errors %}
+              <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+            {% endfor %}
+          {% endif %}
+        </div>
+        
+        <div class="flex justify-center mt-3">
+          <button
+            type="submit"
+            class="button-hover-effect bg-green-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Submit
+          </button>
+          <a
+            class="button-hover-effect bg-yellow-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-3"
+            href="{% url 'pass_change' %}"
+          >
+            Change Your Password
+          </a>
+        </div>
+      </form>
+      
+    </div>
+  </div>
+  <div></div>
+</div>
+
+
+
+
+<div class="grid grid-cols-3 gap-4">
+  <div></div>
+  <div class="py-2 px-3 rounded-xl bg-white mt-12">
+      <h1 class="font-bold text-3xl text-center pb-5 shadow-md">Change Your Password</h1>
+      <div class="w-full mt-10">
+          <form method="post" class="shadow-md border border-gray-200 rounded px-8 pt-6 pb-8 mb-4">
+              {% csrf_token %} {% for hidden_field in form.hidden_fields %} {{ hidden_field.errors }} {{ hidden_field }} {% endfor %} 
+              {% for field in form.visible_fields %}
+              <div class="mb-4">
+                  <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">
+              {{ field.label }}
+          </label>
+                  <input class="shadow appearance-none border border-gray-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" name="{{ field.name }}" id="{{ field.id_for_label }}" type="{{ field.widget_type }}">
+              </div>
+              {% if field.errors %} {% for error in field.errors %}
+              <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
+              {% endfor %} {% endif %} {% endfor %}
+
+              <div class="flex items-center justify-center w-full">
+                  <button class="bg-blue-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+              Submit
+          </button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+
+
+
+{% endblock %}

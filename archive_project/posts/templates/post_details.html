@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block head_title %} {{ post.title | truncatewords:10}} {% endblock %}
+
+{% block content %}
+
+
+<section class="bg-white dark:bg-gray-900">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+        <div class="max-w-screen-lg text-gray-500 sm:text-lg dark:text-gray-400">
+            <h2 class="mb-4 text-4xl tracking-tight font-bold text-gray-900 dark:text-white">{{post.title}}</h2>
+            <p class="m-2">Published Year: {{post.year}}</p>
+            <div class="tags flex gap-3">
+                {% for tag in post.tags.all %}
+                <button type="button" class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">{{tag.name}}</button>
+
+            {% endfor %}
+            </div>
+                
+            <p class="mb-4 font-light text-white">{{post.content}}</p>
+            <h3 class="text-white" >Associated File:</h3>
+            <div
+            class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <div class="p-5">
+              <a href="#">
+                <h5
+                  class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                >
+                  {{file_name}}
+                </h5>
+              </a>
+              <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                {{ file_size }}
+              </p>
+              <button type="button" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"><a href="{% url 'download_file' post.id %}">Download</a></button>
+        
+            </div>
+          </div>
+        
+            <h3 class="text-center font-bold">Associated Poeple</h3>
+            <h3 class="text-center font-bold">Supervisors</h3>
+            <div class="supervisor flex flex-wrap justify-center items-center">
+                {% for supervisor in post.supervisors.all %}
+                <div class="max-w-xs m-4">
+                    <div class="bg-gray-500 shadow-xl rounded-lg py-3">
+                        <div class="photo-wrapper p-2">
+                            <img class="w-32 h-32 rounded-full mx-auto" src="https://static1.thegamerimages.com/wordpress/wp-content/uploads/2019/11/Red-Dead-Redemption-2-Arthur-Morgan-Afraid.jpg" alt="John Doe">
+                        </div>
+                        <div class="p-2">
+                            <h3 class="text-center text-xl text-white font-medium leading-8">{{supervisor.first_name}} {{supervisor.last_name}}</h3>
+                            <div class="text-center text-white text-xs font-semibold">
+                                <p>{{supervisor.profile.designation}}</p>
+                            </div>
+                            <table class="text-xs my-3">
+                                <tbody>
+                                    <tr>
+                                        <td class="px-2 py-2 text-white font-semibold">Address</td>
+                                        <td class="px-2 py-2">{{supervisor.profile.address}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-2 py-2 text-white font-semibold">Phone</td>
+                                        <td class="px-2 py-2">{{supervisor.profile.contact_number}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-2 py-2 text-white font-semibold">Email</td>
+                                        <td class="px-2 py-2">{{supervisor.email}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h3 class="text-center font-bold">Students</h3>
+            <div class="author flex flex-wrap justify-center items-center">
+                {% for author in post.authors.all %}
+                <div class="max-w-xs m-4">
+                    <div class="bg-gray-500 shadow-xl rounded-lg py-3">
+                        <div class="photo-wrapper p-2">
+                            <img class="w-32 h-32 rounded-full mx-auto" src="https://static1.thegamerimages.com/wordpress/wp-content/uploads/2019/11/Red-Dead-Redemption-2-Arthur-Morgan-Afraid.jpg" alt="John Doe">
+                        </div>
+                        <div class="p-2">
+                            <h3 class="text-center text-xl text-white font-medium leading-8">{{author.first_name}} {{author.last_name}}</h3>
+                            <div class="text-center text-white text-xs font-semibold">
+                                <p>{{author.profile.designation}}</p>
+                            </div>
+                            <table class="text-xs my-3">
+                                <tbody>
+                                    <tr>
+                                        <td class="px-2 py-2 text-white font-semibold">Address</td>
+                                        <td class="px-2 py-2">{{author.profile.address}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-2 py-2 text-white font-semibold">Phone</td>
+                                        <td class="px-2 py-2">{{author.profile.contact_number}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-2 py-2 text-white font-semibold">Email</td>
+                                        <td class="px-2 py-2">{{author.email}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+  </section>
+
+
+
+
+
+
+{% endblock %}

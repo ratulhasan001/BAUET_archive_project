@@ -1,0 +1,11 @@
+.button-hover-effect {
+    background: linear-gradient(90deg, #38a169 50%, #2f855a 50%);
+    background-size: 200% 100%;
+    background-position: left bottom;
+    transition: background-position 0.5s ease;
+  }
+  
+  .button-hover-effect:hover {
+    background-position: right bottom;
+  }
+  
