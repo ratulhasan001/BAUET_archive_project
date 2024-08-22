@@ -43,10 +43,23 @@ def home(request, tag_slug=None, dept_slug=None):
 
 
 
+
+from django.db.models import Q
+
 def search_posts(request):
     query = request.GET.get('q')
-    if query:
+    category = request.GET.get('category', 'title')
+    
+    if category == 'title':
         data = Post.objects.filter(title__icontains=query, is_approved=True)
+    elif category == 'supervisor':
+        data = Post.objects.filter(
+            Q(supervisors__first_name__icontains=query) | 
+            Q(supervisors__last_name__icontains=query), 
+            is_approved=True
+        ).distinct()
+    elif category == 'year':
+        data = Post.objects.filter(year=query, is_approved=True)
     else:
         data = Post.objects.filter(is_approved=True)
     
@@ -55,37 +68,7 @@ def search_posts(request):
         'query': query,
     }
     return render(request, 'search_posts.html', context)
-from django.db.models import Q
 
-def search_by_supervisor(request):
-    query = request.GET.get('supervisor')
-    if query:
-        posts = Post.objects.filter(
-            Q(supervisors__first_name__icontains=query) | 
-            Q(supervisors__last_name__icontains=query), 
-            is_approved=True
-        ).distinct()
-    else:
-        posts = Post.objects.filter(is_approved=True)
-    
-    context = {
-        'posts': posts,
-        'query': query,
-    }
-    return render(request, 'search_by_supervisor.html', context)
-
-def search_by_year(request):
-    query = request.GET.get('year')
-    if query:
-        posts = Post.objects.filter(year=query, is_approved=True)
-    else:
-        posts = Post.objects.filter(is_approved=True)
-    
-    context = {
-        'posts': posts,
-        'query': query,
-    }
-    return render(request, 'search_by_year.html', context)
 
 
 from django.http import FileResponse

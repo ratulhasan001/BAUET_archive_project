@@ -1,0 +1,49 @@
+{% load static tailwind_tags %} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block head_title %}BAUET Archive{% endblock %}
+    </title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css"
+      rel="stylesheet"
+    />
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <link rel="stylesheet" href="{% static 'css/register_css.css' %}" />
+    {% block link_css %}{% endblock %}
+    {% tailwind_css %}
+    <style>
+
+      body, html {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+        
+      }
+
+      #main {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col min-h-screen bg-gray-400">
+    {% include 'exp_navbar.html' %}
+    <div id="main" class="flex-grow">
+      {% block body %}
+        <div class="lg:container lg:mx-auto">
+          {% include 'messages.html' %}
+        </div>
+        {% block content %}
+        {% endblock %}
+      {% endblock %}
+    </div>
+    {% include 'footer.html' %}
+    {% block scripts %}{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
+  </body>
+</html>
