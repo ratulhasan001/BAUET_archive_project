@@ -12,5 +12,4 @@ class PostAdmin(admin.ModelAdmin):
                 pass
 
 admin.site.register(Post, PostAdmin)
-admin.site.register(Comment)
-admin.site.register(Wishlist)
+admin.site.register(CustomTag)

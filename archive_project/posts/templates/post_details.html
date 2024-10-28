@@ -17,24 +17,27 @@
             </div>
                 
             <p class="mb-4 font-light text-white">{{post.content}}</p>
-            <h3 class="text-white" >Associated File:</h3>
-            <div
-            class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-            <div class="p-5">
-              <a href="#">
-                <h5
-                  class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                >
-                  {{file_name}}
-                </h5>
-              </a>
-              <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                {{ file_size }}
-              </p>
-              <button type="button" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"><a href="{% url 'download_file' post.id %}">Download</a></button>
-        
-            </div>
-          </div>
+            <h3 class="text-white">Associated File:</h3>
+<div
+  class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+  <div class="p-5">
+    <a href="#">
+      <h5
+        class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white truncate"
+        style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"
+      >
+        {{file_name}}
+      </h5>
+    </a>
+    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+      {{ file_size }}
+    </p>
+    <button type="button" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+      <a href="{% url 'download_file' post.id %}">Download</a>
+    </button>
+  </div>
+</div>
+
         
             <h3 class="text-center font-bold">Associated Poeple</h3>
             <h3 class="text-center font-bold">Supervisors</h3>
@@ -43,7 +46,7 @@
                 <div class="max-w-xs m-4">
                     <div class="bg-gray-500 shadow-xl rounded-lg py-3">
                         <div class="photo-wrapper p-2">
-                            <img class="w-32 h-32 rounded-full mx-auto" src="https://static1.thegamerimages.com/wordpress/wp-content/uploads/2019/11/Red-Dead-Redemption-2-Arthur-Morgan-Afraid.jpg" alt="John Doe">
+                            <img class="w-32 h-32 rounded-full mx-auto" src="{{ supervisor.profile.image.url }}" alt="John Doe">
                         </div>
                         <div class="p-2">
                             <h3 class="text-center text-xl text-white font-medium leading-8">{{supervisor.first_name}} {{supervisor.last_name}}</h3>
@@ -78,7 +81,7 @@
                 <div class="max-w-xs m-4">
                     <div class="bg-gray-500 shadow-xl rounded-lg py-3">
                         <div class="photo-wrapper p-2">
-                            <img class="w-32 h-32 rounded-full mx-auto" src="https://static1.thegamerimages.com/wordpress/wp-content/uploads/2019/11/Red-Dead-Redemption-2-Arthur-Morgan-Afraid.jpg" alt="John Doe">
+                            <img class="w-32 h-32 rounded-full mx-auto" src="{{author.profile.image.url}}" alt="John Doe">
                         </div>
                         <div class="p-2">
                             <h3 class="text-center text-xl text-white font-medium leading-8">{{author.first_name}} {{author.last_name}}</h3>
