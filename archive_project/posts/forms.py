@@ -37,7 +37,6 @@ class EditPostForm(forms.ModelForm):
         if commit:
             post.save()
 
-        # Handle author emails without clearing existing authors
         author_emails = self.cleaned_data['author_emails']
         emails = [email.strip() for email in author_emails.split(',') if email.strip()]
         for email in emails:
@@ -45,7 +44,6 @@ class EditPostForm(forms.ModelForm):
                 user = User.objects.get(email=email)
                 post.authors.add(user)
             except User.DoesNotExist:
-                # Handle case where user does not exist
                 pass
         supervisor_emails = self.cleaned_data['supervisor_emails']
         emails = [email.strip() for email in supervisor_emails.split(',') if email.strip()]

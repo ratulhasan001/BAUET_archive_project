@@ -4,8 +4,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
 
-    
-    
+
 from django.shortcuts import render
 from departments.models import Department
 from posts.models import Post, Wishlist
@@ -47,15 +46,17 @@ def home(request, tag_slug=None, dept_slug=None):
 from django.db.models import Q
 
 def search_posts(request):
-    query = request.GET.get('q')
+    query = request.GET.get('q', '').strip() 
     category = request.GET.get('category', 'title')
     
+    query_lower = query.lower()
+
     if category == 'title':
         data = Post.objects.filter(title__icontains=query, is_approved=True)
     elif category == 'supervisor':
         data = Post.objects.filter(
-            Q(supervisors__first_name__icontains=query) | 
-            Q(supervisors__last_name__icontains=query), 
+            Q(supervisors__first_name__icontains=query_lower) | 
+            Q(supervisors__last_name__icontains=query_lower), 
             is_approved=True
         ).distinct()
     elif category == 'year':
@@ -68,6 +69,7 @@ def search_posts(request):
         'query': query,
     }
     return render(request, 'search_posts.html', context)
+
 
 
 
