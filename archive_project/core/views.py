@@ -22,7 +22,7 @@ def home(request, tag_slug=None, dept_slug=None):
 
     if dept_slug is not None:
         selected_dept = get_object_or_404(Department, slug=dept_slug)
-        data = Post.objects.filter(department=selected_dept)
+        data = Post.objects.filter(department=selected_dept, is_approved=True)
 
     # if request.user.is_authenticated:
     #     wishlist = Wishlist.objects.get(user=request.user).posts.all()
@@ -61,6 +61,12 @@ def search_posts(request):
         ).distinct()
     elif category == 'year':
         data = Post.objects.filter(year=query, is_approved=True)
+    elif category == 'student':
+        data = Post.objects.filter(
+            Q(authors__first_name__icontains=query_lower) | 
+            Q(authors__last_name__icontains=query_lower), 
+            is_approved=True
+        ).distinct()
     else:
         data = Post.objects.filter(is_approved=True)
     
@@ -69,6 +75,7 @@ def search_posts(request):
         'query': query,
     }
     return render(request, 'search_posts.html', context)
+
 
 
 
