@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log in · BAUET Project &amp; Thesis Archive</title>
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/app.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.4"></script>
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <div id="app-header"></div>
+    <main class="flex-1">
+      <div class="container-page flex justify-center py-12 sm:py-16">
+        <div class="w-full max-w-md">
+          <div class="mb-8 text-center">
+            <img src="assets/logo.png" class="mx-auto h-14 w-14 object-contain" alt="" />
+            <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900">Welcome back</h1>
+            <p class="mt-2 text-sm text-slate-500">Log in to submit and manage your work.</p>
+          </div>
+          <form id="login-form" class="card space-y-5 p-6 sm:p-8" novalidate>
+            <p data-form-error class="hidden rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></p>
+            <div data-field>
+              <label for="username" class="label">Username</label>
+              <input id="username" name="username" class="input" autocomplete="username" required autofocus />
+            </div>
+            <div data-field>
+              <label for="password" class="label">Password</label>
+              <input id="password" name="password" type="password" class="input" autocomplete="current-password" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-full">Log in</button>
+          </form>
+          <p class="mt-6 text-center text-sm text-slate-500">
+            New here? <a href="register.html" class="font-semibold text-indigo-600 hover:text-indigo-500">Create an account</a>
+          </p>
+        </div>
+      </div>
+    </main>
+    <div id="app-footer"></div>
+    <script type="module" src="js/pages/login.js"></script>
+  </body>
+</html>

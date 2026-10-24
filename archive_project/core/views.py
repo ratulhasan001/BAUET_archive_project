@@ -1,93 +1,119 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Count, Q
+from django.http import FileResponse, Http404
+from django.shortcuts import get_object_or_404, render
 
-
-
-from django.shortcuts import render
 from departments.models import Department
-from posts.models import Post, Wishlist
-from django.shortcuts import render, get_object_or_404
-from posts.models import Post, CustomTag
+from posts.models import CustomTag, Post
+
+SEARCH_CATEGORIES = [
+    ("all", "All fields"),
+    ("title", "Title"),
+    ("supervisor", "Supervisor"),
+    ("student", "Student"),
+    ("year", "Year"),
+]
+
+PAGE_SIZE = 9
+
+
+def approved_posts():
+    return Post.objects.filter(is_approved=True).select_related("department").prefetch_related("tags")
+
+
+def paginate(request, queryset):
+    return Paginator(queryset, PAGE_SIZE).get_page(request.GET.get("page"))
+
+
+def person_query(relation, term):
+    return (
+        Q(**{f"{relation}__first_name__icontains": term})
+        | Q(**{f"{relation}__last_name__icontains": term})
+        | Q(**{f"{relation}__username__icontains": term})
+    )
+
 
 @login_required
-def home(request, tag_slug=None, dept_slug=None):
-    data = Post.objects.filter(is_approved=True)
-    files = Post.objects.filter(is_approved=True)
-    wishlist = []
-    dept = Department.objects.all()
-    
-    selected_dept = None
+def home(request, dept_slug=None, tag_slug=None):
+    posts = approved_posts()
+    selected_dept = selected_tag = None
 
-    if dept_slug is not None:
+    if dept_slug:
         selected_dept = get_object_or_404(Department, slug=dept_slug)
-        data = Post.objects.filter(department=selected_dept, is_approved=True)
+        posts = posts.filter(department=selected_dept)
+    if tag_slug:
+        selected_tag = get_object_or_404(CustomTag, slug=tag_slug)
+        posts = posts.filter(tags=selected_tag)
 
-    # if request.user.is_authenticated:
-    #     wishlist = Wishlist.objects.get(user=request.user).posts.all()
+    tags = (
+        CustomTag.objects.annotate(num_posts=Count("tagged_items"))
+        .filter(num_posts__gt=0)
+        .order_by("-num_posts", "name")[:15]
+    )
+    return render(
+        request,
+        "home.html",
+        {
+            "page_obj": paginate(request, posts),
+            "departments": Department.objects.exclude(slug__isnull=True).exclude(slug=""),
+            "tags": tags,
+            "selected_dept": selected_dept,
+            "selected_tag": selected_tag,
+            "total_posts": Post.objects.filter(is_approved=True).count(),
+        },
+    )
 
-    if tag_slug is not None:
-        tag = get_object_or_404(CustomTag, slug=tag_slug)
-        data = Post.objects.filter(tags__in=[tag], is_approved=True)
-        
-    tags = CustomTag.objects.all()
-    return render(request, 'home.html', {
-        'data': data, 
-        'files': files, 
-        'tags': tags, 
-        'wishlist_posts': wishlist,
-        'dept': dept,
-        })
 
-
-
-
-from django.db.models import Q
-
+@login_required
 def search_posts(request):
-    query = request.GET.get('q', '').strip() 
-    category = request.GET.get('category', 'title')
-    
-    query_lower = query.lower()
+    query = request.GET.get("q", "").strip()
+    category = request.GET.get("category", "all")
+    posts = approved_posts()
 
-    if category == 'title':
-        data = Post.objects.filter(title__icontains=query, is_approved=True)
-    elif category == 'supervisor':
-        data = Post.objects.filter(
-            Q(supervisors__first_name__icontains=query_lower) | 
-            Q(supervisors__last_name__icontains=query_lower), 
-            is_approved=True
-        ).distinct()
-    elif category == 'year':
-        data = Post.objects.filter(year=query, is_approved=True)
-    elif category == 'student':
-        data = Post.objects.filter(
-            Q(authors__first_name__icontains=query_lower) | 
-            Q(authors__last_name__icontains=query_lower), 
-            is_approved=True
-        ).distinct()
-    else:
-        data = Post.objects.filter(is_approved=True)
-    
-    context = {
-        'data': data,
-        'query': query,
-    }
-    return render(request, 'search_posts.html', context)
+    if query:
+        if category == "title":
+            posts = posts.filter(title__icontains=query)
+        elif category == "supervisor":
+            posts = posts.filter(person_query("supervisors", query))
+        elif category == "student":
+            posts = posts.filter(person_query("authors", query))
+        elif category == "year":
+            posts = posts.filter(year=query) if query.isdigit() else posts.none()
+        else:
+            category = "all"
+            filters = (
+                Q(title__icontains=query)
+                | Q(content__icontains=query)
+                | Q(tags__name__icontains=query)
+                | person_query("authors", query)
+                | person_query("supervisors", query)
+            )
+            if query.isdigit():
+                filters |= Q(year=query)
+            posts = posts.filter(filters)
+        posts = posts.distinct()
+
+    page_obj = paginate(request, posts)
+    return render(
+        request,
+        "search_posts.html",
+        {
+            "page_obj": page_obj,
+            "query": query,
+            "category": category,
+            "categories": SEARCH_CATEGORIES,
+        },
+    )
 
 
-
-
-
-from django.http import FileResponse
-from django.shortcuts import get_object_or_404
-import os
+@login_required
 def download_file(request, post_id):
-    post_file = get_object_or_404(Post, pk=post_id)
-    file_path = post_file.file.path
-    file_name = os.path.basename(file_path)
-    response = FileResponse(open(file_path, 'rb'))
-    response['Content-Type'] = 'application/octet-stream'
-    response['Content-Disposition'] = f'attachment; filename="{file_name}"' 
-    return response
+    post = get_object_or_404(Post, pk=post_id)
+    if not post.can_view(request.user) or not post.file:
+        raise Http404
+    try:
+        handle = post.file.open("rb")
+    except FileNotFoundError:
+        raise Http404("File not found.")
+    return FileResponse(handle, as_attachment=True, filename=post.file_name)

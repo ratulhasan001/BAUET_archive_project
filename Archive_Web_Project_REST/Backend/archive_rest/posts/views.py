@@ -1,26 +1,45 @@
-from rest_framework import viewsets, permissions
-from . import models
-from . import serializers
+from django.db.models import Q
+from rest_framework import permissions, viewsets
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
-class PostViewset(viewsets.ModelViewSet):
-    queryset = models.Post.objects.all()
-    serializer_class = serializers.PostSerializer
+from .models import Post
+from .permissions import IsManagerOrReadOnly
+from .serializers import PostSerializer
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def perform_create(self, serializer):
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsManagerOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-        serializer.save(authors=[self.request.user])
+    def get_queryset(self):
+        user = self.request.user
+        params = self.request.query_params
+        queryset = Post.objects.select_related("department").prefetch_related(
+            "authors__profile", "supervisors__profile"
+        )
 
-    def perform_update(self, serializer):
+        if params.get("mine") and user.is_authenticated:
+            return queryset.filter(Q(authors=user) | Q(supervisors=user)).distinct()
 
-        instance = self.get_object()
-        if self.request.user not in instance.authors.all() and self.request.user not in instance.supervisors.all():
-            raise PermissionError("You do not have permission to edit this post.")
-        serializer.save()
+        if self.action == "list":
+            queryset = queryset.filter(is_approved=True)
+        elif user.is_authenticated and not user.is_staff:
+            queryset = queryset.filter(Q(is_approved=True) | Q(authors=user) | Q(supervisors=user))
+        elif not user.is_staff:
+            queryset = queryset.filter(is_approved=True)
 
-    def perform_destroy(self, instance):
-  
-        if self.request.user not in instance.authors.all() and self.request.user not in instance.supervisors.all():
-            raise PermissionError("You do not have permission to delete this post.")
-        instance.delete()
+        if department := params.get("department"):
+            queryset = queryset.filter(department__slug=department)
+        if year := params.get("year"):
+            queryset = queryset.filter(year=year) if year.isdigit() else queryset.none()
+        if search := params.get("search", "").strip():
+            people = Q()
+            for relation in ["authors", "supervisors"]:
+                people |= Q(**{f"{relation}__first_name__icontains": search})
+                people |= Q(**{f"{relation}__last_name__icontains": search})
+                people |= Q(**{f"{relation}__username__icontains": search})
+            queryset = queryset.filter(
+                Q(title__icontains=search) | Q(content__icontains=search) | people
+            )
+        return queryset.distinct()

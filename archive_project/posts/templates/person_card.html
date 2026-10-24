@@ -1,0 +1,8 @@
+<li class="flex items-center gap-4 rounded-xl border border-slate-200 p-4">
+  {% include 'avatar.html' with person=person %}
+  <div class="min-w-0">
+    <p class="truncate font-semibold text-slate-900">{{ person.get_full_name|default:person.username }}</p>
+    <p class="truncate text-xs text-slate-500">{{ person.profile.designation|default:"Member" }}{% if person.profile.dept %} · {{ person.profile.dept }}{% endif %}</p>
+    {% if person.email %}<a href="mailto:{{ person.email }}" class="truncate text-xs text-indigo-600 hover:text-indigo-500">{{ person.email }}</a>{% endif %}
+  </div>
+</li>

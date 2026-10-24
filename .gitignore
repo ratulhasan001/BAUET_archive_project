@@ -1,1 +1,27 @@
-archive_project/archive_project/.env
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Django
+*.sqlite3
+media/
+staticfiles/
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

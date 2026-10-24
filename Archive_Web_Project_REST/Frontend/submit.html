@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Submit work · BAUET Project &amp; Thesis Archive</title>
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/app.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.4"></script>
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <div id="app-header"></div>
+    <main class="flex-1">
+      <div class="container-page flex justify-center py-12 sm:py-16">
+        <div class="w-full max-w-3xl">
+          <div class="mb-8 text-center">
+            <h1 id="form-title" class="text-2xl font-bold tracking-tight text-slate-900">Submit a project or thesis</h1>
+            <p id="form-subtitle" class="mt-2 text-sm text-slate-500">Submissions appear in the archive once an administrator approves them.</p>
+          </div>
+          <form id="post-form" class="card space-y-6 p-6 sm:p-8" novalidate>
+            <p data-form-error class="hidden rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></p>
+            <div data-field>
+              <label for="title" class="label">Title <span class="text-rose-500">*</span></label>
+              <input id="title" name="title" class="input" maxlength="200" required />
+            </div>
+            <div data-field>
+              <label for="content" class="label">Abstract <span class="text-rose-500">*</span></label>
+              <textarea id="content" name="content" rows="6" class="input" required></textarea>
+            </div>
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div data-field>
+                <label for="department" class="label">Department <span class="text-rose-500">*</span></label>
+                <select id="department" name="department" class="input" required>
+                  <option value="">Select a department</option>
+                </select>
+              </div>
+              <div data-field>
+                <label for="year" class="label">Year <span class="text-rose-500">*</span></label>
+                <input id="year" name="year" type="number" min="2000" class="input" required />
+              </div>
+            </div>
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div data-field>
+                <label for="author_emails" class="label">Co-author emails</label>
+                <input id="author_emails" name="author_emails" class="input" placeholder="friend@example.com, ..." />
+                <p class="hint">Comma separated. Each person must already have an account.</p>
+              </div>
+              <div data-field>
+                <label for="supervisor_emails" class="label">Supervisor emails</label>
+                <input id="supervisor_emails" name="supervisor_emails" class="input" placeholder="supervisor@example.com" />
+                <p class="hint">Comma separated. Each person must already have an account.</p>
+              </div>
+            </div>
+            <div data-field>
+              <label for="file" class="label">Document <span id="file-required" class="text-rose-500">*</span></label>
+              <input id="file" name="file" type="file" class="input" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip" />
+              <p id="current-file" class="hint hidden"></p>
+            </div>
+            <div class="flex justify-end gap-3 border-t border-slate-100 pt-6">
+              <a id="cancel-link" href="profile.html" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">Submit for review</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+    <div id="app-footer"></div>
+    <script type="module" src="js/pages/submit.js"></script>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create account · BAUET Project &amp; Thesis Archive</title>
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/app.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.4"></script>
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <div id="app-header"></div>
+    <main class="flex-1">
+      <div class="container-page flex justify-center py-12 sm:py-16">
+        <div class="w-full max-w-2xl">
+          <div class="mb-8 text-center">
+            <img src="assets/logo.png" class="mx-auto h-14 w-14 object-contain" alt="" />
+            <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900">Create your account</h1>
+            <p class="mt-2 text-sm text-slate-500">Students and faculty of BAUET can join the archive.</p>
+          </div>
+          <form id="register-form" class="card space-y-6 p-6 sm:p-8" novalidate>
+            <p data-form-error class="hidden rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></p>
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div data-field>
+                <label for="first_name" class="label">First name <span class="text-rose-500">*</span></label>
+                <input id="first_name" name="first_name" class="input" autocomplete="given-name" required />
+              </div>
+              <div data-field>
+                <label for="last_name" class="label">Last name <span class="text-rose-500">*</span></label>
+                <input id="last_name" name="last_name" class="input" autocomplete="family-name" required />
+              </div>
+              <div data-field>
+                <label for="username" class="label">Username <span class="text-rose-500">*</span></label>
+                <input id="username" name="username" class="input" autocomplete="username" required />
+              </div>
+              <div data-field>
+                <label for="email" class="label">Email <span class="text-rose-500">*</span></label>
+                <input id="email" name="email" type="email" class="input" autocomplete="email" required />
+              </div>
+              <div data-field>
+                <label for="designation" class="label">Designation <span class="text-rose-500">*</span></label>
+                <select id="designation" name="designation" class="input" required>
+                  <option>Student</option>
+                  <option>Lecturer</option>
+                  <option>Assistant Professor</option>
+                  <option>Associate Professor</option>
+                  <option>Professor</option>
+                </select>
+              </div>
+              <div data-field>
+                <label for="dept" class="label">Department</label>
+                <select id="dept" name="dept" class="input">
+                  <option>Computer Science and Engineering</option>
+                  <option>Electrical and Electronic Engineering</option>
+                  <option>Information and Communication Engineering</option>
+                  <option>Civil Engineering</option>
+                  <option>Mechanical Engineering</option>
+                  <option>Business Administration</option>
+                </select>
+              </div>
+              <div data-field>
+                <label for="contact_number" class="label">Contact number</label>
+                <input id="contact_number" name="contact_number" class="input" maxlength="11" autocomplete="tel" />
+              </div>
+              <div data-field>
+                <label for="address" class="label">Address</label>
+                <input id="address" name="address" class="input" maxlength="200" autocomplete="street-address" />
+              </div>
+              <div data-field>
+                <label for="password" class="label">Password <span class="text-rose-500">*</span></label>
+                <input id="password" name="password" type="password" class="input" autocomplete="new-password" required />
+              </div>
+              <div data-field>
+                <label for="confirm_password" class="label">Confirm password <span class="text-rose-500">*</span></label>
+                <input id="confirm_password" name="confirm_password" type="password" class="input" autocomplete="new-password" required />
+              </div>
+            </div>
+            <div data-field>
+              <label for="image" class="label">Profile photo</label>
+              <input id="image" name="image" type="file" accept="image/*" class="input" />
+            </div>
+            <button type="submit" class="btn btn-primary w-full">Create account</button>
+          </form>
+          <p class="mt-6 text-center text-sm text-slate-500">
+            Already registered? <a href="login.html" class="font-semibold text-indigo-600 hover:text-indigo-500">Log in</a>
+          </p>
+        </div>
+      </div>
+    </main>
+    <div id="app-footer"></div>
+    <script type="module" src="js/pages/register.js"></script>
+  </body>
+</html>

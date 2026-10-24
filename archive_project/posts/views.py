@@ -1,132 +1,109 @@
-from django.shortcuts import redirect, render
-from . import forms
-from . import models
-from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
-from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.conf import settings
 from django.contrib import messages
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.views.generic import CreateView,UpdateView,DeleteView,DetailView
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
-def sned_mail(user, subject, template):
-        message = render_to_string(template, {
-            'user' : user,
-        })
-        send_email = EmailMultiAlternatives(subject, '', to=[user.email])
-        send_email.attach_alternative(message, "text/html")
-        send_email.send()
+from .forms import CommentForm, PostForm
+from .models import Post, Wishlist
 
+
+def get_managed_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if not post.can_manage(request.user):
+        raise Http404
+    return post
 
 
 @login_required
 def add_post(request):
-    if request.method == 'POST':
-        post_form = forms.PostForm(request.POST, request.FILES)
-        if post_form.is_valid():
-            post = post_form.save(commit=False)
-            post.save()
-            post.authors.add(request.user)
-            post_form.save_m2m()
-            # sned_mail(request.user, "Pending Message", "pa.html")
-            return redirect('add_post')
-    else:
-        post_form = forms.PostForm()
-    return render(request, 'add_post.html', {'form': post_form})
+    form = PostForm(request.POST or None, request.FILES or None, user=request.user)
+    if request.method == "POST" and form.is_valid():
+        post = form.save()
+        messages.success(request, f"“{post.title}” was submitted and is waiting for approval.")
+        return redirect("profile")
+    return render(request, "add_post.html", {"form": form})
 
 
 @login_required
 def edit_post(request, id):
-    post = models.Post.objects.get(pk=id)
-    if request.method == 'POST':
-        post_form = forms.EditPostForm(request.POST, request.FILES, instance=post)
-        if post_form.is_valid():
-            post_form.save()
-            return redirect('homepage')
-    else:
-        post_form = forms.EditPostForm(instance=post)
-    return render(request, 'edit_post.html', {'form': post_form})
-
+    post = get_managed_post(request, id)
+    form = PostForm(request.POST or None, request.FILES or None, instance=post, user=request.user)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Post updated.")
+        return redirect(post)
+    return render(request, "edit_post.html", {"form": form, "post": post})
 
 
 @login_required
 def delete_post(request, id):
-    post = models.Post.objects.get(pk=id)
-    post.delete()
-    return redirect('homepage')
+    post = get_managed_post(request, id)
+    if request.method == "POST":
+        post.file.delete(save=False)
+        post.delete()
+        messages.success(request, "Post deleted.")
+        return redirect("profile")
+    return render(request, "confirm_delete.html", {"post": post})
 
-# @method_decorator(login_required, name='dispatch')
-from django.template.defaultfilters import filesizeformat
-
-class DetailPostView(DetailView):
-    model = models.Post
-    pk_url_kwarg = 'id'
-    template_name = 'post_details.html'
-    
-    def post(self, request, *args, **kwargs):
-        comment_form = forms.CommentForm(data=self.request.POST)
-        post = self.get_object()
-        if comment_form.is_valid():
-            new_comment = comment_form.save(commit=False)
-            new_comment.post = post
-            new_comment.save()
-        return self.get(request, *args, **kwargs)
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        post = self.object 
-        comments = post.comments.all()
-        comment_form = forms.CommentForm()
-
-        # Add file name and size to context if file exists
-        if post.file:
-            file_name = post.file.name.split('/')[-1]  # Get the filename without the path
-            file_size = filesizeformat(post.file.size)
-            context['file_name'] = file_name
-            context['file_size'] = file_size
-        
-        context['comments'] = comments
-        context['comment_form'] = comment_form
-        return context
-
-
-
-# views.py
-from django.shortcuts import redirect, render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Post, Wishlist
-from django.contrib import messages
 
 @login_required
+def detail_post(request, id):
+    post = get_object_or_404(
+        Post.objects.select_related("department").prefetch_related(
+            "tags", "authors__profile", "supervisors__profile"
+        ),
+        pk=id,
+    )
+    if not post.can_view(request.user):
+        raise Http404
+
+    form = CommentForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        comment = form.save(commit=False)
+        comment.post = post
+        comment.name = request.user.get_full_name() or request.user.username
+        comment.email = request.user.email
+        comment.save()
+        messages.success(request, "Comment posted.")
+        return redirect(post)
+
+    wishlist = getattr(request.user, "wishlist", None)
+    context = {
+        "post": post,
+        "comments": post.comments.all(),
+        "comment_form": form,
+        "can_manage": post.can_manage(request.user),
+        "is_saved": bool(wishlist and wishlist.posts.filter(pk=post.pk).exists()),
+    }
+    if post.file:
+        try:
+            context["file_size"] = post.file.size
+        except OSError:
+            context["file_missing"] = True
+    return render(request, "post_details.html", context)
+
+
+@login_required
+@require_POST
 def add_to_wishlist(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
-    if post in wishlist.posts.all():
-        messages.info(request, 'Post already in wishlist.')
-    else:
-        wishlist.posts.add(post)
-        messages.success(request, 'Post added to wishlist.')
-    return redirect('homepage')
+    post = get_object_or_404(Post, id=post_id, is_approved=True)
+    wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+    wishlist.posts.add(post)
+    messages.success(request, "Saved to your reading list.")
+    return redirect(post)
+
 
 @login_required
+@require_POST
 def remove_from_wishlist(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    wishlist = Wishlist.objects.get(user=request.user)
-    if post in wishlist.posts.all():
+    wishlist = getattr(request.user, "wishlist", None)
+    if wishlist:
         wishlist.posts.remove(post)
-        messages.success(request, 'Post removed from wishlist.')
-    else:
-        messages.info(request, 'Post not in wishlist.')
-    return redirect('profile')
-
-from django.shortcuts import render, get_object_or_404
-from .models import Post, CustomTag
-from departments.models import Department
-
-def tag_wise_post(request, tag_slug):
-    tag = get_object_or_404(CustomTag, slug=tag_slug)
-    dept = Department.objects.all()
-    posts = Post.objects.filter(tags__in=[tag], is_approved=True)
-    return render(request, 'home.html', {'data': posts, 'tag': tag, 'dept': dept,})
+    messages.info(request, "Removed from your reading list.")
+    next_url = request.POST.get("next")
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
+    return redirect(post)

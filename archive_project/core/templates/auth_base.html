@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-page flex justify-center py-12 sm:py-16">
+  <div class="w-full {% block card_width %}max-w-md{% endblock %}">
+    <div class="mb-8 text-center">
+      <img src="{% static 'images/logo.png' %}" class="mx-auto h-14 w-14 object-contain" alt="" />
+      <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900">{% block card_title %}{% endblock %}</h1>
+      <p class="mt-2 text-sm text-slate-500">{% block card_subtitle %}{% endblock %}</p>
+    </div>
+    <div class="card p-6 sm:p-8">
+      {% block card_body %}{% endblock %}
+    </div>
+    {% block card_footer %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

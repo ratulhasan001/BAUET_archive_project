@@ -1,103 +1,83 @@
 from django import forms
-from .models import Post, Comment
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from django.contrib import messages
-from django.contrib.auth.models import User
+from django.utils import timezone
 from taggit.forms import TagWidget
 
+from core.forms import StyledFormMixin
 
-class PostForm(forms.ModelForm):
+from .models import Comment, Post
+
+
+def parse_emails(raw):
+    return sorted({email.strip().lower() for email in raw.split(",") if email.strip()})
+
+
+class PostForm(StyledFormMixin, forms.ModelForm):
+    author_emails = forms.CharField(
+        label="Co-author emails",
+        required=False,
+        help_text="Comma separated. Each person must already have an account.",
+    )
+    supervisor_emails = forms.CharField(
+        label="Supervisor emails",
+        required=False,
+        help_text="Comma separated. Each person must already have an account.",
+    )
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'year', 'file', 'tags', 'department']
+        fields = ["title", "content", "department", "year", "tags", "file"]
         widgets = {
-            'tags': TagWidget(attrs={'class': 'form-control'}),
-            'department': forms.Select(attrs={'class': 'form-control'}),
+            "content": forms.Textarea(attrs={"rows": 6}),
+            "tags": TagWidget(attrs={"placeholder": "machine learning, iot, web"}),
         }
+        help_texts = {"tags": "Comma separated keywords."}
+
+    def __init__(self, *args, user, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        self.fields["year"].widget.attrs.update({"min": 2000, "max": timezone.now().year + 1})
+        self.fields["department"].empty_label = "Select a department"
+        if self.instance.pk:
+            self.fields["file"].required = False
+            self.initial["author_emails"] = ", ".join(
+                self.instance.authors.exclude(pk=user.pk).values_list("email", flat=True)
+            )
+            self.initial["supervisor_emails"] = ", ".join(
+                self.instance.supervisors.values_list("email", flat=True)
+            )
+
+    def _users_for(self, field_name):
+        emails = parse_emails(self.cleaned_data.get(field_name, ""))
+        users = list(User.objects.filter(email__in=emails))
+        missing = set(emails) - {u.email.lower() for u in users}
+        if missing:
+            raise forms.ValidationError(
+                "No account found for: " + ", ".join(sorted(missing))
+            )
+        return users
+
+    def clean_author_emails(self):
+        return self._users_for("author_emails")
+
+    def clean_supervisor_emails(self):
+        return self._users_for("supervisor_emails")
 
     def save(self, commit=True):
-        post = super(PostForm, self).save(commit=False)
+        is_new = self.instance.pk is None
+        post = super().save(commit=commit)
         if commit:
-            post.save()
+            authors = set(self.cleaned_data["author_emails"])
+            if is_new or post.authors.filter(pk=self.user.pk).exists():
+                authors.add(self.user)
+            post.authors.set(authors)
+            post.supervisors.set(self.cleaned_data["supervisor_emails"])
         return post
 
 
-class EditPostForm(forms.ModelForm):
-    author_emails = forms.CharField(help_text="Enter author emails separated by commas", required=False)
-    supervisor_emails = forms.CharField(help_text="Enter sps emails separated by commas", required=False)
-
+class CommentForm(StyledFormMixin, forms.ModelForm):
     class Meta:
-        model = Post
-        fields = ['title', 'content', 'author_emails', 'supervisor_emails', 'year', 'file','department']
-
-    def save(self, commit=True):
-        post = super(EditPostForm, self).save(commit=False)
-        if commit:
-            post.save()
-
-        author_emails = self.cleaned_data['author_emails']
-        emails = [email.strip() for email in author_emails.split(',') if email.strip()]
-        for email in emails:
-            try:
-                user = User.objects.get(email=email)
-                post.authors.add(user)
-            except User.DoesNotExist:
-                pass
-        supervisor_emails = self.cleaned_data['supervisor_emails']
-        emails = [email.strip() for email in supervisor_emails.split(',') if email.strip()]
-        for email in emails:
-            try:
-                user = User.objects.get(email=email)
-                post.supervisors.add(user)
-            except User.DoesNotExist:
-                # Handle case where user does not exist
-                pass
-
-        if commit:
-            post.save()
-        return post
-
-
-class CommentForm(forms.ModelForm):
-    class Meta: 
         model = Comment
-        fields = ['name', 'email', 'body']
-
-# class PostForm(forms.ModelForm):
-#     author_emails = forms.CharField(help_text="Enter author emails separated by commas", required=False)
-#     supervisor_emails = forms.CharField(help_text="Enter sps emails separated by commas", required=False)
-
-#     class Meta:
-#         model = Post
-#         fields = ['title', 'content', 'category', 'author_emails', 'supervisor_emails', 'year']
-
-#     def save(self, commit=True):
-#         post = super(PostForm, self).save(commit=False)
-#         if commit:
-#             post.save()
-
-#         # Handle author emails without clearing existing authors
-#         author_emails = self.cleaned_data['author_emails']
-#         emails = [email.strip() for email in author_emails.split(',') if email.strip()]
-#         for email in emails:
-#             try:
-#                 user = User.objects.get(email=email)
-#                 post.authors.add(user)
-#             except User.DoesNotExist:
-#                 # Handle case where user does not exist
-#                 pass
-#         supervisor_emails = self.cleaned_data['supervisor_emails']
-#         emails = [email.strip() for email in supervisor_emails.split(',') if email.strip()]
-#         for email in emails:
-#             try:
-#                 user = User.objects.get(email=email)
-#                 post.supervisors.add(user)
-#             except User.DoesNotExist:
-#                 # Handle case where user does not exist
-#                 pass
-
-#         if commit:
-#             post.save()
-#         return post
+        fields = ["body"]
+        labels = {"body": "Add a comment"}
+        widgets = {"body": forms.Textarea(attrs={"rows": 3, "placeholder": "Share your thoughts..."})}

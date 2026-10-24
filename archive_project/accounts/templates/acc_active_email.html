@@ -1,5 +1,9 @@
-{% autoescape off %}
-Hi {{ user.username }},
-Please click on the link below to confirm your registration:
-http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+{% autoescape off %}Hi {{ user.get_short_name|default:user.username }},
+
+Thanks for joining the BAUET Project & Thesis Archive.
+Please confirm your email address by opening the link below:
+
+{{ protocol }}://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+If you didn't create this account, you can ignore this email.
 {% endautoescape %}

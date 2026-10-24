@@ -1,13 +1,14 @@
-{% for message in messages %}
-
-<div class="bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3 shadow-md mt-2" role="alert">
-    <div class="flex">
-        <div class="py-1"><svg class="fill-current h-6 w-6 text-teal-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
-        <div>
-            <p class="font-bold">Success!</p>
-            <p class="text-sm">{{ message }}</p>
-        </div>
-    </div>
+{% if messages %}
+<div class="container-page mt-6 space-y-3">
+  {% for message in messages %}
+  <div role="alert" class="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-sm
+    {% if message.tags == 'error' %}border-rose-200 bg-rose-50 text-rose-800
+    {% elif message.tags == 'warning' %}border-amber-200 bg-amber-50 text-amber-800
+    {% elif message.tags == 'success' %}border-emerald-200 bg-emerald-50 text-emerald-800
+    {% else %}border-indigo-200 bg-indigo-50 text-indigo-800{% endif %}">
+    <p class="flex-1">{{ message }}</p>
+    <button type="button" data-dismiss class="opacity-60 hover:opacity-100" aria-label="Dismiss">&times;</button>
+  </div>
+  {% endfor %}
 </div>
-
-{% endfor %}
+{% endif %}

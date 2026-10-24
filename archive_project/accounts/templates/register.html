@@ -1,52 +1,30 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block content %}
-{% for i in messages %}
-<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
-  <h3 class="text-{{i.tags}} block sm:inline">{{i}}</h3>
-</div>
-{% endfor %}
-{% if form.non_field_errors %}
-{% for error in form.non_field_errors %}
-<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
-    <p class="font-bold">Error!</p>
-    <p class="block sm:inline">{{ error }}</p>
-</div>
-{% endfor %}
-{% endif %}
-<div class="grid grid-cols-3 gap-4">
-    <div></div>
-    <div class="py-2 px-3 rounded-xl bg-white mt-12">
-
-        <h1 class="font-bold text-3xl text-center p-2">Register</h1>
-        <div class="w-full mt-10">
-            <form method="post" enctype="multipart/form-data" class="shadow-md border border-gray-200 rounded px-8 pt-6 pb-8 mb-4">
-                {% csrf_token %}
-                {% for hidden_field in form.hidden_fields %}
-                {{ hidden_field.errors }}
-                {{ hidden_field }}
-                {% endfor %}
-                
-                {% for field in form.visible_fields %}
-                <div class="mb-3">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">
-                        {{ field.label }}
-                    </label>
-                    {{ field }}
-                </div>
-                {% if field.errors %}
-                {% for error in field.errors %}
-                <p class="text-red-600 text-sm italic pb-2">{{ error }}</p>
-                {% endfor %}
-                {% endif %}
-                {% endfor %}
-                <div class="flex items-center justify-center w-full">
-                    <button class="button-hover-effect bg-green-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                        Register
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+{% extends 'auth_base.html' %}
+{% block head_title %}Create account{% endblock %}
+{% block card_width %}max-w-2xl{% endblock %}
+{% block card_title %}Create your account{% endblock %}
+{% block card_subtitle %}Students and faculty of BAUET can join the archive.{% endblock %}
+{% block card_body %}
+<form method="post" enctype="multipart/form-data" class="space-y-6" novalidate>
+  {% csrf_token %}
+  {% include 'form_errors.html' %}
+  <div class="grid gap-5 sm:grid-cols-2">
+    {% with field=form.first_name %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.last_name %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.username %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.email %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.designation %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.dept %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.contact_number %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.address %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.password1 %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.password2 %}{% include 'form_field.html' %}{% endwith %}
+  </div>
+  {% with field=form.image %}{% include 'form_field.html' %}{% endwith %}
+  <button type="submit" class="btn-primary w-full">Create account</button>
+</form>
+{% endblock %}
+{% block card_footer %}
+<p class="mt-6 text-center text-sm text-slate-500">
+  Already registered? <a href="{% url 'user_login' %}" class="font-semibold text-indigo-600 hover:text-indigo-500">Log in</a>
+</p>
 {% endblock %}

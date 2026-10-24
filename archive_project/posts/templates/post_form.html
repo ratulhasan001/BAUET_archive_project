@@ -1,0 +1,23 @@
+<form method="post" enctype="multipart/form-data" class="space-y-6" novalidate>
+  {% csrf_token %}
+  {% include 'form_errors.html' %}
+  {% with field=form.title %}{% include 'form_field.html' %}{% endwith %}
+  {% with field=form.content %}{% include 'form_field.html' %}{% endwith %}
+  <div class="grid gap-5 sm:grid-cols-2">
+    {% with field=form.department %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.year %}{% include 'form_field.html' %}{% endwith %}
+  </div>
+  {% with field=form.tags %}{% include 'form_field.html' %}{% endwith %}
+  <div class="grid gap-5 sm:grid-cols-2">
+    {% with field=form.author_emails %}{% include 'form_field.html' %}{% endwith %}
+    {% with field=form.supervisor_emails %}{% include 'form_field.html' %}{% endwith %}
+  </div>
+  {% with field=form.file %}{% include 'form_field.html' %}{% endwith %}
+  {% if post.file %}
+  <p class="-mt-4 text-xs text-slate-500">Current file: <span class="font-medium text-slate-700">{{ post.file_name }}</span>. Leave empty to keep it.</p>
+  {% endif %}
+  <div class="flex justify-end gap-3 border-t border-slate-100 pt-6">
+    <a href="{{ cancel_url }}" class="btn-secondary">Cancel</a>
+    <button type="submit" class="btn-primary">{{ submit_label }}</button>
+  </div>
+</form>

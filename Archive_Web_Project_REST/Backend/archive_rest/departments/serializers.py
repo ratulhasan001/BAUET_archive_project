@@ -1,7 +1,11 @@
 from rest_framework import serializers
-from . import models
+
+from .models import Department
+
 
 class DepartmentSerializer(serializers.ModelSerializer):
+    post_count = serializers.IntegerField(read_only=True)
+
     class Meta:
-        model = models.Department
-        fields = '__all__'
+        model = Department
+        fields = ["id", "name", "slug", "post_count"]

@@ -1,0 +1,5 @@
+{% if person.profile.image %}
+<img src="{{ person.profile.image.url }}" alt="{{ person.get_full_name|default:person.username }}" class="{{ size|default:'h-12 w-12' }} shrink-0 rounded-full object-cover ring-2 ring-white" />
+{% else %}
+<span class="{{ size|default:'h-12 w-12' }} flex shrink-0 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-700 ring-2 ring-white">{{ person.profile.initials|default:person.username|slice:":2"|upper }}</span>
+{% endif %}

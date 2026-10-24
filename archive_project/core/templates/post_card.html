@@ -1,0 +1,26 @@
+<article class="card group flex flex-col p-6 transition hover:-translate-y-0.5 hover:shadow-md">
+  <div class="mb-3 flex items-center justify-between gap-2 text-xs">
+    <span class="badge truncate bg-indigo-50 text-indigo-700">{{ post.department.name }}</span>
+    <span class="shrink-0 font-medium text-slate-500">{{ post.year }}</span>
+  </div>
+  <h3 class="text-lg font-semibold leading-snug text-slate-900 group-hover:text-indigo-700">
+    <a href="{% url 'detail_post' post.id %}">{{ post.title }}</a>
+  </h3>
+  <p class="mt-2 line-clamp-3 flex-1 text-sm text-slate-600">{{ post.content|truncatewords:40 }}</p>
+  {% with tags=post.tags.all %}
+  {% if tags %}
+  <div class="mt-4 flex flex-wrap gap-1.5">
+    {% for tag in tags|slice:":3" %}
+    <a href="{% url 'tag_wise_post' tag.slug %}" class="tag">#{{ tag.name }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+  {% if show_status and not post.is_approved %}
+  <span class="badge mt-4 w-fit bg-amber-50 text-amber-700">Pending approval</span>
+  {% endif %}
+  <a href="{% url 'detail_post' post.id %}" class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+    View details
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 14 10" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/></svg>
+  </a>
+</article>
